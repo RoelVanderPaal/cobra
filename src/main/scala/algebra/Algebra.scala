@@ -2,7 +2,7 @@ package algebra
 
 import scala.language.implicitConversions
 
-sealed trait Expr {
+sealed trait Expr extends Gradient {
   def rows: Int
 
   def cols: Int
@@ -21,6 +21,15 @@ sealed trait Expr {
 
   def unary_- = Negate(this)
 
+  def sumR = SumR(this)
+
+  def sumC = SumC(this)
+
+  def broadcastR(rows: Int) = BroadcastR(this, rows)
+
+  def broadcastC(cols: Int) = BroadcastC(this, cols)
+
+  def t = Transp(this)
 }
 
 case class Var(name: Symbol, rows: Int = 1, cols: Int = 1) extends Expr
@@ -32,7 +41,6 @@ case class AddOp(e1: Expr, e2: Expr) extends Expr {
   override def rows: Int = e1.rows
 
   override def cols: Int = e1.cols
-
 }
 
 case class SubOp(e1: Expr, e2: Expr) extends Expr {
@@ -42,7 +50,6 @@ case class SubOp(e1: Expr, e2: Expr) extends Expr {
   override def rows: Int = e1.rows
 
   override def cols: Int = e1.cols
-
 }
 
 case class MulOp(e1: Expr, e2: Expr) extends Expr {
@@ -60,7 +67,6 @@ case class EMulOp(e1: Expr, e2: Expr) extends Expr {
   override def rows: Int = e1.rows
 
   override def cols: Int = e1.cols
-
 }
 
 case class EDivOp(e1: Expr, e2: Expr) extends Expr {
@@ -70,15 +76,48 @@ case class EDivOp(e1: Expr, e2: Expr) extends Expr {
   override def rows: Int = e1.rows
 
   override def cols: Int = e1.cols
-
 }
 
 case class Negate(e: Expr) extends Expr {
   override def rows: Int = e.rows
 
   override def cols: Int = e.cols
-
 }
+
+case class SumR(e: Expr) extends Expr {
+  override def rows: Int = 1
+
+  override def cols: Int = e.cols
+}
+
+case class SumC(e: Expr) extends Expr {
+  override def rows: Int = e.rows
+
+  override def cols: Int = 1
+}
+
+case class Transp(e: Expr) extends Expr {
+  override def rows: Int = e.cols
+
+  override def cols: Int = e.rows
+}
+
+
+case class BroadcastR(e: Expr, rows: Int) extends Expr {
+  assert(e.rows == 1, s"BroadcastR: number of rows should be 1 but was ${e.rows} for $e")
+
+  override def cols: Int = e.cols
+}
+
+case class BroadcastC(e: Expr, cols: Int) extends Expr {
+  assert(e.cols == 1, s"BroadcastC: number of cols should be 1 but was ${e.cols} for $e")
+
+  override def rows: Int = e.rows
+}
+
+
+case class Ones(rows: Int, cols: Int) extends Expr
+
 
 object Algebra {
   implicit def symbolToVar(s: Symbol): Var = Var(s)
