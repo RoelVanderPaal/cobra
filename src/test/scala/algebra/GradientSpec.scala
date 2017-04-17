@@ -16,6 +16,7 @@ class GradientSpec extends FunSpec with Matchers {
     val U1 = v('U1, 1, COLS)
     val U2 = v('U2, 1, COLS)
     val U3 = v('U3, 1, COLS)
+    val A = v('A, ROWS, ROWS)
     val A1 = v('A1, ROWS, COLS)
     val A2 = v('A2, ROWS, COLS)
     val A3 = v('A3, ROWS, COLS)
@@ -190,6 +191,27 @@ class GradientSpec extends FunSpec with Matchers {
       V1.broadcastC(COLS).sumC.sumR.grad(V1) shouldBe Some(Ones(ROWS, 1).broadcastC(COLS).sumC)
       U1.broadcastR(ROWS).sumC.sumR.grad(U2) shouldBe None
       V1.broadcastC(COLS).sumC.sumR.grad(V2) shouldBe None
+    }
+    it("sin") {
+      sin(A1).sumC.sumR.grad(A1) shouldBe Some(cos(A1) :* Ones(ROWS, 1).broadcastC(COLS))
+      sin(A1).sumR.sumC.grad(A1) shouldBe Some(cos(A1) :* Ones(1, COLS).broadcastR(ROWS))
+      sin(A1).sumC.sumR.grad(A2) shouldBe None
+      sin(A1).sumR.sumC.grad(A2) shouldBe None
+    }
+    it("cos") {
+      cos(A1).sumC.sumR.grad(A1) shouldBe Some(-sin(A1) :* Ones(ROWS, 1).broadcastC(COLS))
+      cos(A1).sumR.sumC.grad(A1) shouldBe Some(-sin(A1) :* Ones(1, COLS).broadcastR(ROWS))
+      cos(A1).sumC.sumR.grad(A2) shouldBe None
+      cos(A1).sumR.sumC.grad(A2) shouldBe None
+    }
+    it("exp") {
+      exp(A1).sumC.sumR.grad(A1) shouldBe Some(exp(A1) :* Ones(ROWS, 1).broadcastC(COLS))
+      exp(A1).sumR.sumC.grad(A1) shouldBe Some(exp(A1) :* Ones(1, COLS).broadcastR(ROWS))
+      exp(A1).sumC.sumR.grad(A2) shouldBe None
+      exp(A1).sumR.sumC.grad(A2) shouldBe None
+    }
+    it("complex example") {
+      (V1.t * A * V1).grad(V1) shouldBe Some((V1.t * A.t).t + (V1.t * A).t)
     }
   }
 }

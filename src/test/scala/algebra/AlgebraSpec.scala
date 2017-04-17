@@ -149,5 +149,34 @@ class AlgebraSpec extends FunSpec with Matchers {
         r.cols shouldBe 2
       }
     }
+    describe("sin") {
+      it("should create UnOp") {
+        val r = sin(A)
+        r shouldBe UnOp(Sin, A)
+        r.rows shouldBe 2
+        r.cols shouldBe 3
+      }
+    }
+    describe("cos") {
+      it("should create UnOp") {
+        val r = cos(A)
+        r shouldBe UnOp(Cos, A)
+        r.rows shouldBe 2
+        r.cols shouldBe 3
+      }
+    }
+    describe("exp") {
+      it("should create UnOp") {
+        val r = exp(A)
+        r shouldBe UnOp(Exp, A)
+        r.rows shouldBe 2
+        r.cols shouldBe 3
+      }
+    }
+    describe("ones") {
+      it("should create Ones") {
+        ones(3, 4) shouldBe Ones(3, 4)
+      }
+    }
   }
 }

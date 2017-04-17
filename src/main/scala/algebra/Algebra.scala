@@ -2,7 +2,7 @@ package algebra
 
 import scala.language.implicitConversions
 
-sealed trait Expr extends Gradient {
+sealed trait Expr extends Gradient with LatexPrinter {
   def rows: Int
 
   def cols: Int
@@ -118,9 +118,31 @@ case class BroadcastC(e: Expr, cols: Int) extends Expr {
 
 case class Ones(rows: Int, cols: Int) extends Expr
 
+sealed trait UnOperation
+
+case object Sin extends UnOperation
+
+case object Cos extends UnOperation
+
+case object Exp extends UnOperation
+
+case class UnOp(o: UnOperation, e: Expr) extends Expr {
+  override def rows: Int = e.rows
+
+  override def cols: Int = e.cols
+}
+
 
 object Algebra {
   implicit def symbolToVar(s: Symbol): Var = Var(s)
 
   def v(s: Symbol, rows: Int = 1, cols: Int = 1) = Var(s, rows, cols)
+
+  def ones(rows: Int = 1, cols: Int = 1) = Ones(rows, cols)
+
+  def sin(e: Expr) = UnOp(Sin, e)
+
+  def cos(e: Expr) = UnOp(Cos, e)
+
+  def exp(e: Expr) = UnOp(Exp, e)
 }
